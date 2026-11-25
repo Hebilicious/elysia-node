@@ -122,8 +122,8 @@ export const node = () => {
 							"This adapter doesn't support Bun requestIP method"
 						)
 					},
-					stop() {
-						return server.close()
+					stop(closeActiveConnections) {
+						return server.close(closeActiveConnections)
 					},
 					upgrade() {
 						throw new Error(
@@ -153,6 +153,9 @@ export const node = () => {
 						app.event.start[i].fn(this)
 
 				process.on('beforeExit', () => {
+					// `app.stop()` already closed the server and ran the stop hooks.
+					if (app.server !== serverInfo) return
+
 					server.close()
 
 					if (app.event.stop)
